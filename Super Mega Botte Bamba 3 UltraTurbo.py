@@ -1,6 +1,7 @@
 import arcade
 import random
 
+x = 100
 SCREENWIDTH = 1272
 SCREENHEIGHT = 636
 
