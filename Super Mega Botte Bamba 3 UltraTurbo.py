@@ -1,7 +1,6 @@
 import arcade
 import random
 
-x = 100
 SCREENWIDTH = 1272
 SCREENHEIGHT = 636
 
@@ -12,7 +11,40 @@ class Giochino(arcade.Window):
         self.lista_Gabibbo= arcade.SpriteList()
         self.lista_Adrian= arcade.SpriteList()
         self.background_image = arcade.load_texture("./Sanremo.jpg")
+        self.sprite = None
+        self.playerSpriteList = arcade.SpriteList()
+        self.setup()
+        self.muovi_destra = False
+        self.muovi_sinistra = False
 
+
+
+    def setup(self):
+
+        self.sprite=arcade.Sprite("Gabibbo.png")
+
+        self.sprite.center_x = 1150
+        self.sprite.center_y = 195
+        self.sprite.scale = 0.6
+
+        self.lista_Gabibbo.append(self.sprite)
+
+        self.sprite=arcade.Sprite("Adrian.png")
+
+        self.sprite.center_x = 200
+        self.sprite.center_y = 225
+        self.sprite.scale = 0.5
+
+        self.lista_Adrian.append(self.sprite)
+
+
+    def on_update(self, delta_time: float) -> bool | None:
+        if self.muovi_destra:
+            self.sprite.center_x += 10
+        if self.muovi_sinistra:
+            self.sprite.center_x -= 10
+
+        
     def on_draw(self):
         self.clear()
         print(self.background_image)
@@ -20,19 +52,29 @@ class Giochino(arcade.Window):
             self.background_image,
             arcade.LBWH(0,0,SCREENWIDTH,SCREENHEIGHT)
         )
-    def setup(self):
 
-        self.sprite=arcade.Sprite("Gabibbo.png")
+        self.lista_Gabibbo.draw()
+        self.lista_Adrian.draw()
 
-        self.sprite.center_x = 100
-        self.sprite.center_y = 525
-        self.sprite.scale = 100
+        
 
-        self.playerSpriteList.append(self.sprite)
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.W:
+            self.sprite.center_y +=50
+        if key == arcade.key.S:
+            self.sprite.center_y -=50
+        if key == arcade.key.D:
+            self.muovi_destra = True
+        if key == arcade.key.A:
+            self.muovi_sinistra = True
 
-    def on_update(self, delta_time: float) -> bool | None:
-        return super().on_update(delta_time)
+    def on_key_release(self, key, modifiers):
+        if key == arcade.key.D:
+            self.muovi_destra = False
+        if key == arcade.key.A:
+            self.muovi_sinistra = False
 
+        
 
 
 
