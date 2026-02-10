@@ -16,6 +16,7 @@ class Giochino(arcade.Window):
         self.setup()
         self.muovi_destra = False
         self.muovi_sinistra = False
+        self.punch = False
 
 
 
@@ -67,12 +68,16 @@ class Giochino(arcade.Window):
             self.muovi_destra = True
         if key == arcade.key.A:
             self.muovi_sinistra = True
+        if key == arcade.key.P:
+            self.punch = True
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.D:
             self.muovi_destra = False
         if key == arcade.key.A:
             self.muovi_sinistra = False
+        if key == arcade.key.P:
+            self.punch = False
 
         
 
