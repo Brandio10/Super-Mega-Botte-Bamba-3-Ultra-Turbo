@@ -44,6 +44,15 @@ class Giochino(arcade.Window):
             self.sprite.center_x += 10
         if self.muovi_sinistra:
             self.sprite.center_x -= 10
+        if self.sprite.center_x <= 0:
+            self.sprite.center_x = 1
+        if self.sprite.center_x >= 1272:
+            self.sprite.center_x = 1271
+        if self.sprite.center_y <= 226:
+            self.sprite.center_y = 225
+        if self.sprite.center_y >= 401:
+            self.sprite.center_y = 400
+
 
         
     def on_draw(self):
@@ -56,15 +65,7 @@ class Giochino(arcade.Window):
 
         self.lista_Gabibbo.draw()
         self.lista_Adrian.draw()
-
-    if self.sprite.center_x > 0:
-        self.sprite.center_x = 0
-    elif self.sprite.center_x > SCREENHEIGHT:
-        self.sprite.center_x = SCREENWIDTH
-    if self.sprite.center_y > 0:
-        self.sprite.center_y = 0
-    elif self.sprite.center_y > SCREENHEIGHT:
-        self.sprite.center_y = SCREENHEIGHT
+ 
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.W:
