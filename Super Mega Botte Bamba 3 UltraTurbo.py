@@ -71,8 +71,12 @@ class Giochino(arcade.Window):
             self.sprite_adrian.center_x -= 10
         if self.sprite_adrian.center_x <= 0:
             self.sprite_adrian.center_x = 1
+        if self.sprite_gabibbo.center_x <= 0:
+            self.sprite_gabibbo.center_x = 1
         if self.sprite_adrian.center_x >= 1272:
             self.sprite_adrian.center_x = 1271
+        if self.sprite_gabibbo.center_x >= 1272:
+            self.sprite_gabibbo.center_x = 1271
         if self.muovi_destraGabibbo:
             self.sprite_gabibbo.center_x += 10
         if self.muovi_sinistraGabibbo:
@@ -96,7 +100,7 @@ class Giochino(arcade.Window):
 
         self.lista_Gabibbo.draw()
         self.lista_Adrian.draw()
-        self.wall_list.draw()
+        #self.wall_list.draw()
  
 
     def on_key_press(self, key, modifiers):
