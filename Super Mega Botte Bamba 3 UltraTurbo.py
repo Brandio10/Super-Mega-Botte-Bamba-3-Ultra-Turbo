@@ -42,13 +42,7 @@ class Giochino(arcade.Window):
         self.sprite_gabibbo=arcade.Sprite("Gabibbo.png")
 
         self.sprite_gabibbo.center_x = 1150
-        self.sprite_gabibbo.center_y = 195
-        self.sprite_gabibbo.scale = 0.6
-
-
-
-        self.sprite_gabibbo.center_x = 1150
-        self.sprite_gabibbo.center_y = 195
+        self.sprite_gabibbo.center_y = 200
         self.sprite_gabibbo.scale = 0.6
 
         self.lista_Gabibbo.append(self.sprite_gabibbo)
@@ -118,9 +112,9 @@ class Giochino(arcade.Window):
             self.muovi_destraGabibbo = True
         if key == arcade.key.LEFT:
             self.muovi_sinistraGabibbo = True
-        if key == arcade.key.Q:
+        if key == arcade.key.X:
             self.attackAdrian = True
-        if key == arcade.key.E:
+        if key == arcade.key.C:
             self.guardAdrian = True
         if key == arcade.key.N:
             self.attackGabibbo = True
@@ -138,9 +132,9 @@ class Giochino(arcade.Window):
            self.muovi_sinistraGabibbo = False 
         if key == arcade.key.A:
             self.muovi_sinistraAdrian = False
-        if key == arcade.key.Q:
+        if key == arcade.key.X:
             self.attackAdrian =False
-        if key == arcade.key.E:
+        if key == arcade.key.C:
             self.guardAdrian = False
         if key == arcade.key.N:
             self.attackGabibbo = False
