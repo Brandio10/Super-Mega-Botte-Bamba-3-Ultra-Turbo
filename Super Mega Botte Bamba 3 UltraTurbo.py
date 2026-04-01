@@ -4,12 +4,44 @@ import random
 SCREENWIDTH = 1272
 SCREENHEIGHT = 636
 GRAVITY = 1
-PLAYER_JUMP_SPEED = 20
+PLAYER_JUMP_SPEED1 = 25
+PLAYER_JUMP_SPEED2 =18.5
+
+class Attacco1(arcade.Sprite):
+    def __init__(self,player):
+        super().__init__("./pugno.png",scale= 0.1)
+
+        #self.danno_attacco= 10
+
+        self.center_x = player.center_x
+        self.center_y = player.center_y
+
+        self.speed = 15
+        
+
+    def update(self,delta_time):
+        self.center_x += self.speed
+
+class Attacco2(arcade.Sprite):
+    def __init__(self,player):
+        super().__init__("./pugno.png",scale= 0.1)
+
+        #self.danno_attacco= 10
+
+        self.center_x = player.center_x
+        self.center_y = player.center_y
+
+        self.speed = 15
+        
+
+    def update(self,delta_time):
+        self.center_x -= self.speed
+
 
 class Giochino(arcade.Window):
     
     def __init__(self):
-        super().__init__(SCREENWIDTH,SCREENHEIGHT,"Super Mega Botte&Bamba 3 Ultra Turbo")
+        super().__init__(SCREENWIDTH,SCREENHEIGHT,"Super Botte&Bamba 2 Turbo: Adrian vs Gabibbo edition")
     
         self.lista_Gabibbo= arcade.SpriteList()
         self.lista_Adrian= arcade.SpriteList()
@@ -25,6 +57,7 @@ class Giochino(arcade.Window):
         self.guardAdrian = False
         self.attackGabibbo =False
         self.guardGabibbo = False
+        self.lista_potere = arcade.SpriteList()
         self.setup()
 
 
@@ -56,6 +89,8 @@ class Giochino(arcade.Window):
         self.lista_Adrian.append(self.sprite_adrian)
         self.physics_engine_gabibbo = arcade.PhysicsEnginePlatformer(self.sprite_gabibbo, walls=self.wall_list, gravity_constant=GRAVITY)
         self.physics_engine_adrian = arcade.PhysicsEnginePlatformer(self.sprite_adrian, walls=self.wall_list, gravity_constant=GRAVITY)
+        self.physics_engine_G = arcade.PhysicsEngineSimple(self.sprite_gabibbo, self.lista_Adrian)
+        self.physics_engine_A = arcade.PhysicsEngineSimple(self.sprite_adrian, self.lista_Gabibbo)
 
 
     def on_update(self, delta_time: float) -> bool | None:
@@ -80,8 +115,12 @@ class Giochino(arcade.Window):
         if self.sprite_gabibbo.center_y >= 600:
             self.sprite_gabibbo.center_y = 600
 
+        
+
         self.physics_engine_adrian.update()
         self.physics_engine_gabibbo.update()
+        self.physics_engine_G.update()
+        self.physics_engine_A.update()
 
 
         
@@ -95,29 +134,35 @@ class Giochino(arcade.Window):
         self.lista_Gabibbo.draw()
         self.lista_Adrian.draw()
         #self.wall_list.draw()
+        self.lista_potere.draw()
+        self.lista_potere.update()
  
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.W:
             if self.physics_engine_adrian.can_jump():
-                self.sprite_adrian.change_y = PLAYER_JUMP_SPEED
+                self.sprite_adrian.change_y = PLAYER_JUMP_SPEED1
         if key == arcade.key.D:
             self.muovi_destraAdrian = True
         if key == arcade.key.A:
             self.muovi_sinistraAdrian = True
         if key == arcade.key.UP:
             if self.physics_engine_gabibbo.can_jump():
-                self.sprite_gabibbo.change_y = PLAYER_JUMP_SPEED
+                self.sprite_gabibbo.change_y = PLAYER_JUMP_SPEED2
         if key == arcade.key.RIGHT:
             self.muovi_destraGabibbo = True
         if key == arcade.key.LEFT:
             self.muovi_sinistraGabibbo = True
         if key == arcade.key.X:
             self.attackAdrian = True
+            attacco = Attacco1(self.sprite_adrian)
+            self.lista_potere.append(attacco)
         if key == arcade.key.C:
             self.guardAdrian = True
         if key == arcade.key.N:
             self.attackGabibbo = True
+            attacco = Attacco2(self.sprite_gabibbo)
+            self.lista_potere.append(attacco)
         if key == arcade.key.M:
             self.guardGabibbo = True
 
