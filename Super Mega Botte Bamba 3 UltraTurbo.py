@@ -5,7 +5,7 @@ SCREENWIDTH = 1272
 SCREENHEIGHT = 636
 GRAVITY = 1
 PLAYER_JUMP_SPEED1 = 25
-PLAYER_JUMP_SPEED2 =18.5
+PLAYER_JUMP_SPEED2 =18.8
 
 class Attacco1(arcade.Sprite):
     def __init__(self,player):
@@ -15,12 +15,16 @@ class Attacco1(arcade.Sprite):
 
         self.center_x = player.center_x
         self.center_y = player.center_y
-
+        self.distanza_percorsa = 0
+        self.distanza_massima = 250
         self.speed = 15
-        
-
+    
     def update(self,delta_time):
         self.center_x += self.speed
+        self.distanza_percorsa += self.speed
+        if self.distanza_percorsa >= self.distanza_massima:
+            self.remove_from_sprite_lists()
+
 
 class Attacco2(arcade.Sprite):
     def __init__(self,player):
@@ -30,18 +34,22 @@ class Attacco2(arcade.Sprite):
 
         self.center_x = player.center_x
         self.center_y = player.center_y
-
+        self.distanza_percorsa = 250
+        self.distanza_massima = 0
         self.speed = 15
         
 
     def update(self,delta_time):
         self.center_x -= self.speed
+        self.distanza_percorsa -= self.speed
+        if self.distanza_percorsa <= self.distanza_massima:
+            self.remove_from_sprite_lists()
 
 
 class Giochino(arcade.Window):
     
     def __init__(self):
-        super().__init__(SCREENWIDTH,SCREENHEIGHT,"Super Botte&Bamba 2 Turbo: Adrian vs Gabibbo edition")
+        super().__init__(SCREENWIDTH,SCREENHEIGHT,"Super Mega Botte&Bamba 3 Ultra Turbo")
     
         self.lista_Gabibbo= arcade.SpriteList()
         self.lista_Adrian= arcade.SpriteList()
@@ -89,8 +97,6 @@ class Giochino(arcade.Window):
         self.lista_Adrian.append(self.sprite_adrian)
         self.physics_engine_gabibbo = arcade.PhysicsEnginePlatformer(self.sprite_gabibbo, walls=self.wall_list, gravity_constant=GRAVITY)
         self.physics_engine_adrian = arcade.PhysicsEnginePlatformer(self.sprite_adrian, walls=self.wall_list, gravity_constant=GRAVITY)
-        self.physics_engine_G = arcade.PhysicsEngineSimple(self.sprite_gabibbo, self.lista_Adrian)
-        self.physics_engine_A = arcade.PhysicsEngineSimple(self.sprite_adrian, self.lista_Gabibbo)
 
 
     def on_update(self, delta_time: float) -> bool | None:
@@ -119,8 +125,6 @@ class Giochino(arcade.Window):
 
         self.physics_engine_adrian.update()
         self.physics_engine_gabibbo.update()
-        self.physics_engine_G.update()
-        self.physics_engine_A.update()
 
 
         
