@@ -7,18 +7,50 @@ GRAVITY = 1
 PLAYER_JUMP_SPEED1 = 25
 PLAYER_JUMP_SPEED2 =18.8
 
+class Vita1(arcade.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.center_x = 10
+        self.center_y = 600
+        self.width = 300
+        self.height = 25
+        self.MaxVita = 1000
+        self.VitaAttuale = self.MaxVita
+
+    def draw(self):
+        Vita_Width = (self.VitaAttuale / self.MaxVita) *self.width
+        arcade.draw_lbwh_rectangle_filled(self.center_x,self.center_y,self.width,self.height,arcade.color.BLACK)
+        x_offset = (self.width - Vita_Width) / 2
+        arcade.draw_lbwh_rectangle_filled(self.center_x - x_offset,self.center_y,Vita_Width,self.height,arcade.color.GREEN)
+
+
+class Vita2(arcade.Sprite):
+    def __init__ (self):
+        super().__init__()
+        self.center_x = 952
+        self.center_y = 600
+        self.width = 300
+        self.height = 25
+        self.MaxVita = 1000
+        self.VitaAttuale = self.MaxVita
+
+    def draw(self):
+        Vita_Width = (self.VitaAttuale / self.MaxVita) *self.width
+        arcade.draw_lbwh_rectangle_filled(self.center_x,self.center_y,self.width,self.height,arcade.color.BLACK)
+        x_offset = (self.width - Vita_Width) / 2
+        arcade.draw_lbwh_rectangle_filled(self.center_x - x_offset,self.center_y,Vita_Width,self.height,arcade.color.GREEN)
+
+
 class Attacco1(arcade.Sprite):
     def __init__(self,player):
         super().__init__("./pugno.png",scale= 0.1)
-
-        #self.danno_attacco= 10
-
         self.center_x = player.center_x
         self.center_y = player.center_y
         self.distanza_percorsa = 0
         self.distanza_massima = 250
         self.speed = 15
     
+
     def update(self,delta_time):
         self.center_x += self.speed
         self.distanza_percorsa += self.speed
@@ -29,9 +61,6 @@ class Attacco1(arcade.Sprite):
 class Attacco2(arcade.Sprite):
     def __init__(self,player):
         super().__init__("./pugno.png",scale= 0.1)
-
-        #self.danno_attacco= 10
-
         self.center_x = player.center_x
         self.center_y = player.center_y
         self.distanza_percorsa = 250
@@ -73,30 +102,33 @@ class Giochino(arcade.Window):
     def setup(self):
 
         self.pavimento =arcade.Sprite("./Pavimento1.jpg")
-
         self.wall_list.append(self.pavimento)
         self.pavimento.center_x = 625
         self.pavimento.center_y= 0
         self.pavimento.scale_x = 100
         self.pavimento.scale_y =0.5
 
-        self.sprite_gabibbo=arcade.Sprite("Gabibbo.png")
 
+        self.sprite_gabibbo=arcade.Sprite("Gabibbo.png")
         self.sprite_gabibbo.center_x = 1150
         self.sprite_gabibbo.center_y = 200
         self.sprite_gabibbo.scale = 0.6
-
         self.lista_Gabibbo.append(self.sprite_gabibbo)
 
-        self.sprite_adrian=arcade.Sprite("Adrian.png")
 
+        self.sprite_adrian=arcade.Sprite("Adrian.png")
         self.sprite_adrian.center_x = 200
         self.sprite_adrian.center_y = 250
         self.sprite_adrian.scale = 0.5
-
         self.lista_Adrian.append(self.sprite_adrian)
+
+
         self.physics_engine_gabibbo = arcade.PhysicsEnginePlatformer(self.sprite_gabibbo, walls=self.wall_list, gravity_constant=GRAVITY)
         self.physics_engine_adrian = arcade.PhysicsEnginePlatformer(self.sprite_adrian, walls=self.wall_list, gravity_constant=GRAVITY)
+
+
+        self.BarraVitaAdrian = Vita1()
+        self.BarraVitaGabibbo = Vita2()
 
 
     def on_update(self, delta_time: float) -> bool | None:
@@ -122,9 +154,36 @@ class Giochino(arcade.Window):
             self.sprite_gabibbo.center_y = 600
 
         
-
         self.physics_engine_adrian.update()
         self.physics_engine_gabibbo.update()
+        self.lista_potere.update()
+
+
+        for attacco in self.lista_potere:
+            if isinstance(attacco,Attacco1):
+                collisione = arcade.check_for_collision(attacco,self.sprite_gabibbo)
+                if collisione:
+                    attacco.remove_from_sprite_lists()
+                    self.BarraVitaGabibbo.VitaAttuale -= 20
+                if self.BarraVitaGabibbo.VitaAttuale <= 0:
+                    self.BarraVitaGabibbo.VitaAttuale = 0
+                if self.guardGabibbo:
+                    self.BarraVitaGabibbo.VitaAttuale += 20
+                    if self.BarraVitaGabibbo.VitaAttuale > self.BarraVitaGabibbo.MaxVita:
+                        self.BarraVitaGabibbo.VitaAttuale = self.BarraVitaGabibbo.MaxVita
+
+        for attacco in self.lista_potere:
+            if isinstance(attacco,Attacco2):
+                collisione = arcade.check_for_collision(attacco,self.sprite_adrian)
+                if collisione:
+                    attacco.remove_from_sprite_lists()
+                    self.BarraVitaAdrian.VitaAttuale -= 20
+        if self.BarraVitaAdrian.VitaAttuale <= 0:
+            self.BarraVitaAdrian.VitaAttuale = 0
+        if self.guardAdrian:
+            self.BarraVitaAdrian.VitaAttuale += 20
+            if self.BarraVitaAdrian.VitaAttuale > self.BarraVitaAdrian.MaxVita:
+                self.BarraVitaAdrian.VitaAttuale = self.BarraVitaAdrian.MaxVita
 
 
         
@@ -139,7 +198,8 @@ class Giochino(arcade.Window):
         self.lista_Adrian.draw()
         #self.wall_list.draw()
         self.lista_potere.draw()
-        self.lista_potere.update()
+        self.BarraVitaAdrian.draw()
+        self.BarraVitaGabibbo.draw()
  
 
     def on_key_press(self, key, modifiers):
