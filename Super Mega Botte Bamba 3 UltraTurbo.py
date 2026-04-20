@@ -1,11 +1,155 @@
 import arcade
 import random
 
+
 SCREENWIDTH = 1272
 SCREENHEIGHT = 636
 GRAVITY = 1
 PLAYER_JUMP_SPEED1 = 25
 PLAYER_JUMP_SPEED2 =18.8
+
+
+class SpriteAnimato(arcade.Sprite):
+    def __init__(self, scala: float = 1.0):
+        super().__init__(scale=scala)
+        self.animazioni = {}          # nome -> dizionario con textures, durata_frame, loop
+        self.animazione_corrente = None
+        self.animazione_default = None
+        self.tempo_frame = 0.0
+        self.indice_frame = 0
+
+    def aggiungi_animazione(
+        self,
+        nome: str,
+        percorso: str,
+        frame_width: int,
+        frame_height: int,
+        num_frame: int,
+        colonne: int,
+        durata: float,
+        loop: bool = True,
+        default: bool = False,
+        riga: int = 0,
+    ):
+        """
+        Carica uno spritesheet e registra l'animazione con il nome dato.
+
+        loop    : se True l'animazione riparte dall'inizio quando finisce
+        default : se True questa è l'animazione di riposo (quella a cui si
+                  torna automaticamente quando una animazione non in loop finisce)
+        riga    : riga dello spritesheet da cui estrarre i frame (0 = prima riga)
+        """
+        sheet = arcade.load_spritesheet(percorso)
+        offset = riga * colonne
+        tutti = sheet.get_texture_grid(
+            size=(frame_width, frame_height),
+            columns=colonne,
+            count=offset + num_frame,
+        )
+        self._registra(nome, tutti[offset:], durata, loop, default)
+
+    def _registra(self, nome, textures, durata, loop, default=False):
+        """Usato internamente per registrare texture già caricate."""
+        self.animazioni[nome] = {
+            "textures": textures,
+            "durata_frame": durata / len(textures),
+            "loop": loop,
+        }
+        if default or self.animazione_default is None:
+            self.animazione_default = nome
+        if self.animazione_corrente is None:
+            self._vai(nome)
+
+    def imposta_animazione(self, nome: str):
+        """Cambia animazione (ignorata se è già quella attiva, evita reset del frame)."""
+        if nome != self.animazione_corrente:
+            self._vai(nome)
+
+    def _vai(self, nome: str):
+        self.animazione_corrente = nome
+        self.indice_frame = 0
+        self.tempo_frame = 0.0
+        self.texture = self.animazioni[nome]["textures"][0]
+
+    def update_animation(self, delta_time: float = 1 / 60):
+        anim = self.animazioni[self.animazione_corrente]
+        self.tempo_frame += delta_time
+
+        if self.tempo_frame < anim["durata_frame"]:
+            return  # non è ancora il momento di cambiare frame
+
+        self.tempo_frame -= anim["durata_frame"]
+        prossimo = self.indice_frame + 1
+
+        if prossimo < len(anim["textures"]):
+            # Frame successivo nello stesso ciclo
+            self.indice_frame = prossimo
+        elif anim["loop"]:
+            # Fine ciclo: ricominciamo da capo
+            self.indice_frame = 0
+        else:
+            # Animazione finita e non looppa: torna alla default
+            self._vai(self.animazione_default)
+            return
+
+        self.texture = anim["textures"][self.indice_frame]
+
+
+class AdrianAnimation(SpriteAnimato):
+    def __init__(self):
+        # Usiamo scala 0.1 o simile se 680x1000 è troppo grande per lo schermo
+        super().__init__(scala=0.3) 
+        
+        sheet = arcade.load_spritesheet("./AdrianCalcioSpriteSheet.png")
+# Carichiamo la griglia 5x5
+        tutti_i_frame = sheet.get_texture_grid(size=(256, 256), columns=5, count=25)
+
+# Selezioniamo solo l'ultimo (indice 24 per una griglia da 25)
+        frame_singolo = [tutti_i_frame[24]] 
+
+# Usiamo il metodo interno _registra che hai già nel tuo codice
+        self._registra(
+            nome="idle",
+            textures=frame_singolo,
+        durata=1.0,
+        loop=True,
+        default=True
+        )
+
+        # WALK (Camminata/Calcio)
+        # Qui mantieni i dati dello spritesheet (256x256)
+        self.aggiungi_animazione(
+            nome="walk1",
+            percorso="./AdrianCamminata1.png",
+            frame_width=256,
+            frame_height=256,
+            num_frame=25,
+            colonne=5,
+            durata=0.5,
+            loop=True,
+        )
+        self.aggiungi_animazione(
+            nome="walk2",
+            percorso="./AdrianCamminata2.png",
+            frame_width=256,
+            frame_height=256,
+            num_frame=25,
+            colonne=5,
+            durata=0.5,
+            loop=True,
+        )
+
+        # ATTACK
+        self.aggiungi_animazione(
+            nome="attack",
+            percorso="AdrianCalcioSpriteSheet.png",
+            frame_width=256,
+            frame_height=256,
+            num_frame=10,
+            colonne=5,
+            durata=0.3,
+            loop=False,
+        )
 
 
 class MenuView(arcade.View):
@@ -82,7 +226,7 @@ class Attacco1(arcade.Sprite):
         self.center_x = player.center_x
         self.center_y = player.center_y
         self.distanza_percorsa = 0
-        self.distanza_massima = 175
+        self.distanza_massima = 150
         self.speed = 15
     
 
@@ -154,19 +298,19 @@ class Giochino(arcade.Window):
         self.sprite_gabibbo.center_y = 200
         self.sprite_gabibbo.scale = 0.6
         self.lista_Gabibbo.append(self.sprite_gabibbo)
-        self.texture_gabibbo_morto = arcade.load_texture("pugno.png")
+        self.texture_gabibbo_morto = arcade.load_texture("Gabibbo.png")
 
 
-        self.sprite_adrian=arcade.Sprite("Adrian.png")
+        self.sprite_adrian = AdrianAnimation()
         self.sprite_adrian.center_x = 200
         self.sprite_adrian.center_y = 250
-        self.sprite_adrian.scale = 0.5
+        self.sprite_adrian.scale = 4.3
         self.lista_Adrian.append(self.sprite_adrian)
-        self.texture_adrian_morto = arcade.load_texture("pugno.png")
+        self.texture_adrian_morto = arcade.load_texture("Adrian.png")
 
-        self.immagine_fine1 = arcade.load_texture("./pugno.png")
-        self.immagine_fine2 = arcade.load_texture("./pugno.png")
-        self.immagine_fine3 = arcade.load_texture("./pugno.png")
+        self.immagine_fine1 = arcade.load_texture("Vittoria Adrian.png")
+        self.immagine_fine2 = arcade.load_texture("Vittoria Gabibbo.png")
+        self.immagine_fine3 = arcade.load_texture("Pareggio.png")
 
 
 
@@ -179,10 +323,26 @@ class Giochino(arcade.Window):
 
 
     def on_update(self, delta_time: float) -> bool | None:
+
+        self.sprite_adrian.update_animation(delta_time)
+
+        # --- LOGICA ANIMAZIONI CORRETTA ---
+        if self.muovi_destraAdrian:
+            self.sprite_adrian.imposta_animazione("walk1")
+            
+        elif self.muovi_sinistraAdrian: # Usiamo elif per collegarli
+            self.sprite_adrian.imposta_animazione("walk2")
+            
+        elif self.sprite_adrian.animazione_corrente != "attack":
+            # Torna idle solo se NON si muove in nessuna direzione E non sta attaccando
+            self.sprite_adrian.imposta_animazione("idle")
+
         if self.muovi_destraAdrian and not self.guardAdrian:
             self.sprite_adrian.center_x += 7.5
+
         if self.muovi_sinistraAdrian and not self.guardAdrian:
             self.sprite_adrian.center_x -= 7.5
+
 
         if self.sprite_adrian.center_x <= 0:
             self.sprite_adrian.center_x = 1
@@ -268,11 +428,11 @@ class Giochino(arcade.Window):
         #self.lista_potere.draw()
         self.BarraVitaAdrian.draw()
         self.BarraVitaGabibbo.draw()
-        if self.gabibbo_morto:
+        if self.gabibbo_morto and not self.adrian_morto:
             arcade.draw_texture_rect(
                 self.immagine_fine1, 
                 arcade.XYWH(SCREENWIDTH / 2, SCREENHEIGHT / 2, 400, 200))
-        if self.adrian_morto:
+        if self.adrian_morto and not self.gabibbo_morto:
             arcade.draw_texture_rect(
                 self.immagine_fine2, 
                 arcade.XYWH(SCREENWIDTH / 2, SCREENHEIGHT / 2, 400, 200))
@@ -300,6 +460,7 @@ class Giochino(arcade.Window):
         if key == arcade.key.X:
             attacco = Attacco1(self.sprite_adrian)
             self.lista_potere.append(attacco)
+            self.sprite_adrian.imposta_animazione("attack")
         if key == arcade.key.C:
             self.guardAdrian = True
         if key == arcade.key.N:
