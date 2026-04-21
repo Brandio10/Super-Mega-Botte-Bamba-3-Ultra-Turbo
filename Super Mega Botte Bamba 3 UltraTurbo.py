@@ -30,8 +30,7 @@ class SpriteAnimato(arcade.Sprite):
         loop: bool = True,
         default: bool = False,
         riga: int = 0,
-    ):
-       
+    ):     
         sheet = arcade.load_spritesheet(percorso)
         offset = riga * colonne
         tutti = sheet.get_texture_grid(
@@ -72,28 +71,24 @@ class SpriteAnimato(arcade.Sprite):
         self.tempo_frame -= anim["durata_frame"]
         prossimo = self.indice_frame + 1
 
-        if prossimo < len(anim["textures"]):
-            
+        if prossimo < len(anim["textures"]):           
             self.indice_frame = prossimo
-        elif anim["loop"]:
-            
+        elif anim["loop"]:           
             self.indice_frame = 0
-        else:
-            
+        else:          
             self._vai(self.animazione_default)
             return
-
         self.texture = anim["textures"][self.indice_frame]
 
 
 class AdrianAnimation(SpriteAnimato):
     def __init__(self):
         
-        super().__init__(scala=0.3) 
+        super().__init__(scala=0.3)
+        #Fa in modo che il frame idle sia l'ultimo dello sprite sheet
         sheet = arcade.load_spritesheet("./AdrianCalcioSpriteSheet.png")
         tutti_i_frame = sheet.get_texture_grid(size=(256, 256), columns=5, count=25)
         frame_singolo = [tutti_i_frame[24]] 
-
         self._registra(
             nome="idle",
             textures=frame_singolo,
@@ -102,8 +97,7 @@ class AdrianAnimation(SpriteAnimato):
         default=True
         )
 
-        # WALK (Camminata/Calcio)
-        # Qui mantieni i dati dello spritesheet (256x256)
+        #Animazione verso destra
         self.aggiungi_animazione(
             nome="walk1",
             percorso="./AdrianCamminata1.png",
@@ -114,6 +108,7 @@ class AdrianAnimation(SpriteAnimato):
             durata=0.5,
             loop=True,
         )
+        #Animazione verso sinistra
         self.aggiungi_animazione(
             nome="walk2",
             percorso="./AdrianCamminata2.png",
@@ -124,8 +119,7 @@ class AdrianAnimation(SpriteAnimato):
             durata=0.5,
             loop=True,
         )
-
-        # ATTACK
+        #Animazione attacco
         self.aggiungi_animazione(
             nome="attack",
             percorso="AdrianCalcioSpriteSheet.png",
@@ -141,10 +135,10 @@ class AdrianAnimation(SpriteAnimato):
 class GabibboAnimation(SpriteAnimato):
     def __init__(self):
         super().__init__(scala=1)
+        #Fa in modo che il frame idle sia l'ultimo dello sprite sheet
         sheet = arcade.load_spritesheet("./GabibboAttacco.png")
         tutti_i_frame = sheet.get_texture_grid(size=(187, 181), columns=13, count=13)
         frame_singolo = [tutti_i_frame[4]] 
-
         self._registra(
             nome="idle",
             textures=frame_singolo,
@@ -152,7 +146,7 @@ class GabibboAnimation(SpriteAnimato):
             loop=True,
             default=True
         )
-
+        #Animazione verso destra
         self.aggiungi_animazione(
             nome="walk1",
             percorso="./GabibboCamminata1.png",
@@ -161,8 +155,9 @@ class GabibboAnimation(SpriteAnimato):
             num_frame=7,
             colonne=7,
             durata=0.5,
-            loop=True,
+            loop=True
         )
+        #Animazione verso sinistra
         self.aggiungi_animazione(
             nome="walk2",
             percorso="./GabibboCamminata2.png",
@@ -171,9 +166,9 @@ class GabibboAnimation(SpriteAnimato):
             num_frame=7,
             colonne=7,
             durata=0.5,
-            loop=True,
+            loop=True
         )
-
+        #Animazione attacco
         self.aggiungi_animazione(
             nome="attack",
             percorso="./GabibboAttacco.png",
@@ -181,12 +176,12 @@ class GabibboAnimation(SpriteAnimato):
             frame_height=181,
             num_frame=13,
             colonne=13,
-            durata=0.6,
-            loop=False,
+            durata=0.678,
+            loop=False
         )
 
 
-
+#Gestisce il menu iniziale del gioco
 class MenuView(arcade.View):
     def on_show_view(self):
         arcade.set_background_color(arcade.color.BLACK)
@@ -202,7 +197,7 @@ class MenuView(arcade.View):
             battle_view.setup()
             self.window.show_view(battle_view)
 
-
+#Gestisce la Vita di Adrian
 class Vita1(arcade.Sprite):
     def __init__(self):
         super().__init__()
@@ -228,7 +223,7 @@ class Vita1(arcade.Sprite):
                          anchor_y="center",
                          bold=True)
 
-
+#Gestisce la Vita del Gabibbo
 class Vita2(arcade.Sprite):
     def __init__ (self):
         super().__init__()
@@ -254,7 +249,7 @@ class Vita2(arcade.Sprite):
                          anchor_y="center",
                          bold=True)
 
-
+#Gestisce l'attacco di Adrian
 class Attacco1(arcade.Sprite):
     def __init__(self,player):
         super().__init__("./pugno.png",scale= 0.1)
@@ -271,7 +266,7 @@ class Attacco1(arcade.Sprite):
         if self.distanza_percorsa >= self.distanza_massima:
             self.remove_from_sprite_lists()
 
-
+#Gestisce l'attacco del Gabibbo
 class Attacco2(arcade.Sprite):
     def __init__(self,player):
         super().__init__("./pugno.png",scale= 0.1)
@@ -288,12 +283,13 @@ class Attacco2(arcade.Sprite):
         if self.distanza_percorsa <= self.distanza_massima:
             self.remove_from_sprite_lists()
 
-
+#Classe principale del gioco
 class Giochino(arcade.Window):
     
     def __init__(self):
         super().__init__(SCREENWIDTH,SCREENHEIGHT,"Super Botte&Bamba 2 Turbo: ADRIAN vs GABIBBO EDITION")
     
+    #Inizializza tutte le variabili necessarie
         self.lista_Gabibbo= arcade.SpriteList()
         self.lista_Adrian= arcade.SpriteList()
         self.wall_list= arcade.SpriteList()
@@ -319,7 +315,7 @@ class Giochino(arcade.Window):
         self.wall_list.clear()
         self.lista_potere.clear()
 
-
+        #Crea il pavimento
         self.pavimento =arcade.Sprite("./Pavimento1.jpg")
         self.wall_list.append(self.pavimento)
         self.pavimento.center_x = 625
@@ -327,7 +323,7 @@ class Giochino(arcade.Window):
         self.pavimento.scale_x = 100
         self.pavimento.scale_y =0.5
 
-
+        #Crea il Gabibbo
         self.sprite_gabibbo= GabibboAnimation()
         self.sprite_gabibbo.center_x = 1150
         self.sprite_gabibbo.center_y = 200
@@ -335,7 +331,7 @@ class Giochino(arcade.Window):
         self.lista_Gabibbo.append(self.sprite_gabibbo)
         self.texture_gabibbo_morto = arcade.load_texture("Gabibbo.png")
 
-
+        #Crea Adrian
         self.sprite_adrian = AdrianAnimation()
         self.sprite_adrian.center_x = 200
         self.sprite_adrian.center_y = 250
@@ -362,6 +358,7 @@ class Giochino(arcade.Window):
         self.sprite_adrian.update_animation(delta_time)
         self.sprite_gabibbo.update_animation(delta_time)
 
+        #Gestisce le animazioni per Adrian e Gabibbo
         if self.muovi_destraAdrian:
             self.sprite_adrian.imposta_animazione("walk1") 
         elif self.muovi_sinistraAdrian:
@@ -377,12 +374,12 @@ class Giochino(arcade.Window):
             self.sprite_gabibbo.imposta_animazione("idle")
 
 
+        #Gestisce il movimento
         if self.muovi_destraAdrian and not self.guardAdrian:
             self.sprite_adrian.center_x += 7.5
 
         if self.muovi_sinistraAdrian and not self.guardAdrian:
             self.sprite_adrian.center_x -= 7.5
-
 
         if self.sprite_adrian.center_x <= 0:
             self.sprite_adrian.center_x = 1
@@ -407,7 +404,7 @@ class Giochino(arcade.Window):
         if self.sprite_gabibbo.center_y >= 600:
             self.sprite_gabibbo.center_y = 600
 
-
+        #Gestisce le morti
         if self.BarraVitaGabibbo.VitaAttuale <= 0:
             self.BarraVitaGabibbo.VitaAttuale = 0
             self.gabibbo_morto = True
@@ -423,7 +420,7 @@ class Giochino(arcade.Window):
             self.sprite_adrian.texture = self.texture_adrian_morto
             self.sprite_adrian.center_y -= 20
 
-
+        #Impedisce ai personaggi di sovrapporsi
         distanza_x = abs(self.sprite_adrian.center_x - self.sprite_gabibbo.center_x)
         distanza_minima = 70
         if distanza_x < distanza_minima:
@@ -438,7 +435,7 @@ class Giochino(arcade.Window):
 
         self.lista_potere.update()
 
-
+        #Gestisce i danni
         for attacco in self.lista_potere:
             if isinstance(attacco,Attacco1):
                 if arcade.check_for_collision(attacco, self.sprite_gabibbo):
@@ -461,7 +458,7 @@ class Giochino(arcade.Window):
             self.background_image,
             arcade.LBWH(0,0,SCREENWIDTH,SCREENHEIGHT)
         )
-
+        #Faccio comparire a schermo ciò che deve comparire
         self.lista_Gabibbo.draw()
         self.lista_Adrian.draw()
         #self.wall_list.draw()
@@ -483,6 +480,7 @@ class Giochino(arcade.Window):
             
  
     def on_key_press(self, key, modifiers):
+        #Permette di utilizzare i tasti per compiere le varie azioni di gioco
         if key == arcade.key.W:
             if self.physics_engine_adrian.can_jump():
                 self.sprite_adrian.change_y = PLAYER_JUMP_SPEED1
@@ -507,13 +505,13 @@ class Giochino(arcade.Window):
             attacco = Attacco2(self.sprite_gabibbo)
             self.lista_potere.append(attacco)
             self.sprite_gabibbo.imposta_animazione("attack")
-            self.sprite_gabibbo.imposta_animazione("attack")
         if key == arcade.key.M:
             self.guardGabibbo = True
 
 
 
     def on_key_release(self, key, modifiers):
+        #Fa in modo che alcune azioni siano solo momentanee
         if key == arcade.key.D:
             self.muovi_destraAdrian = False
         if key == arcade.key.RIGHT:
@@ -531,10 +529,6 @@ class Giochino(arcade.Window):
         if key == arcade.key.M:
             self.guardGabibbo = False
         
-
-        
-
-
 
 def main():
     window = arcade.Window(SCREENWIDTH, SCREENHEIGHT, "Super Botte & Bamba 2 Turbo: ADRIAN vs GABIBBO EDITION")
