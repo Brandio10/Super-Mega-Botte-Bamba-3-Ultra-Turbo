@@ -12,7 +12,7 @@ PLAYER_JUMP_SPEED2 =18.8
 class SpriteAnimato(arcade.Sprite):
     def __init__(self, scala: float = 1.0):
         super().__init__(scale=scala)
-        self.animazioni = {}          # nome -> dizionario con textures, durata_frame, loop
+        self.animazioni = {}
         self.animazione_corrente = None
         self.animazione_default = None
         self.tempo_frame = 0.0
@@ -31,14 +31,7 @@ class SpriteAnimato(arcade.Sprite):
         default: bool = False,
         riga: int = 0,
     ):
-        """
-        Carica uno spritesheet e registra l'animazione con il nome dato.
-
-        loop    : se True l'animazione riparte dall'inizio quando finisce
-        default : se True questa è l'animazione di riposo (quella a cui si
-                  torna automaticamente quando una animazione non in loop finisce)
-        riga    : riga dello spritesheet da cui estrarre i frame (0 = prima riga)
-        """
+       
         sheet = arcade.load_spritesheet(percorso)
         offset = riga * colonne
         tutti = sheet.get_texture_grid(
@@ -49,7 +42,6 @@ class SpriteAnimato(arcade.Sprite):
         self._registra(nome, tutti[offset:], durata, loop, default)
 
     def _registra(self, nome, textures, durata, loop, default=False):
-        """Usato internamente per registrare texture già caricate."""
         self.animazioni[nome] = {
             "textures": textures,
             "durata_frame": durata / len(textures),
@@ -61,7 +53,6 @@ class SpriteAnimato(arcade.Sprite):
             self._vai(nome)
 
     def imposta_animazione(self, nome: str):
-        """Cambia animazione (ignorata se è già quella attiva, evita reset del frame)."""
         if nome != self.animazione_corrente:
             self._vai(nome)
 
@@ -76,19 +67,19 @@ class SpriteAnimato(arcade.Sprite):
         self.tempo_frame += delta_time
 
         if self.tempo_frame < anim["durata_frame"]:
-            return  # non è ancora il momento di cambiare frame
+            return 
 
         self.tempo_frame -= anim["durata_frame"]
         prossimo = self.indice_frame + 1
 
         if prossimo < len(anim["textures"]):
-            # Frame successivo nello stesso ciclo
+            
             self.indice_frame = prossimo
         elif anim["loop"]:
-            # Fine ciclo: ricominciamo da capo
+            
             self.indice_frame = 0
         else:
-            # Animazione finita e non looppa: torna alla default
+            
             self._vai(self.animazione_default)
             return
 
@@ -97,17 +88,12 @@ class SpriteAnimato(arcade.Sprite):
 
 class AdrianAnimation(SpriteAnimato):
     def __init__(self):
-        # Usiamo scala 0.1 o simile se 680x1000 è troppo grande per lo schermo
-        super().__init__(scala=0.3) 
         
+        super().__init__(scala=0.3) 
         sheet = arcade.load_spritesheet("./AdrianCalcioSpriteSheet.png")
-# Carichiamo la griglia 5x5
         tutti_i_frame = sheet.get_texture_grid(size=(256, 256), columns=5, count=25)
-
-# Selezioniamo solo l'ultimo (indice 24 per una griglia da 25)
         frame_singolo = [tutti_i_frame[24]] 
 
-# Usiamo il metodo interno _registra che hai già nel tuo codice
         self._registra(
             nome="idle",
             textures=frame_singolo,
@@ -147,9 +133,58 @@ class AdrianAnimation(SpriteAnimato):
             frame_height=256,
             num_frame=10,
             colonne=5,
-            durata=0.3,
+            durata=0.6,
             loop=False,
         )
+
+
+class GabibboAnimation(SpriteAnimato):
+    def __init__(self):
+        super().__init__(scala=1)
+        sheet = arcade.load_spritesheet("./GabibboAttacco.png")
+        tutti_i_frame = sheet.get_texture_grid(size=(187, 181), columns=13, count=13)
+        frame_singolo = [tutti_i_frame[4]] 
+
+        self._registra(
+            nome="idle",
+            textures=frame_singolo,
+            durata=1.0,
+            loop=True,
+            default=True
+        )
+
+        self.aggiungi_animazione(
+            nome="walk1",
+            percorso="./GabibboCamminata1.png",
+            frame_width=182,
+            frame_height=197,
+            num_frame=7,
+            colonne=7,
+            durata=0.5,
+            loop=True,
+        )
+        self.aggiungi_animazione(
+            nome="walk2",
+            percorso="./GabibboCamminata2.png",
+            frame_width=182,
+            frame_height=197,
+            num_frame=7,
+            colonne=7,
+            durata=0.5,
+            loop=True,
+        )
+
+        self.aggiungi_animazione(
+            nome="attack",
+            percorso="./GabibboAttacco.png",
+            frame_width=187,
+            frame_height=181,
+            num_frame=13,
+            colonne=13,
+            durata=0.6,
+            loop=False,
+        )
+
 
 
 class MenuView(arcade.View):
@@ -293,10 +328,10 @@ class Giochino(arcade.Window):
         self.pavimento.scale_y =0.5
 
 
-        self.sprite_gabibbo=arcade.Sprite("Gabibbo.png")
+        self.sprite_gabibbo= GabibboAnimation()
         self.sprite_gabibbo.center_x = 1150
         self.sprite_gabibbo.center_y = 200
-        self.sprite_gabibbo.scale = 0.6
+        self.sprite_gabibbo.scale = 2.78
         self.lista_Gabibbo.append(self.sprite_gabibbo)
         self.texture_gabibbo_morto = arcade.load_texture("Gabibbo.png")
 
@@ -325,17 +360,22 @@ class Giochino(arcade.Window):
     def on_update(self, delta_time: float) -> bool | None:
 
         self.sprite_adrian.update_animation(delta_time)
+        self.sprite_gabibbo.update_animation(delta_time)
 
-        # --- LOGICA ANIMAZIONI CORRETTA ---
         if self.muovi_destraAdrian:
-            self.sprite_adrian.imposta_animazione("walk1")
-            
-        elif self.muovi_sinistraAdrian: # Usiamo elif per collegarli
-            self.sprite_adrian.imposta_animazione("walk2")
-            
+            self.sprite_adrian.imposta_animazione("walk1") 
+        elif self.muovi_sinistraAdrian:
+            self.sprite_adrian.imposta_animazione("walk2")         
         elif self.sprite_adrian.animazione_corrente != "attack":
-            # Torna idle solo se NON si muove in nessuna direzione E non sta attaccando
             self.sprite_adrian.imposta_animazione("idle")
+
+        if self.muovi_destraGabibbo:
+            self.sprite_gabibbo.imposta_animazione("walk2")
+        elif self.muovi_sinistraGabibbo:
+            self.sprite_gabibbo.imposta_animazione("walk1")
+        elif self.sprite_gabibbo.animazione_corrente != "attack":
+            self.sprite_gabibbo.imposta_animazione("idle")
+
 
         if self.muovi_destraAdrian and not self.guardAdrian:
             self.sprite_adrian.center_x += 7.5
@@ -466,6 +506,8 @@ class Giochino(arcade.Window):
         if key == arcade.key.N:
             attacco = Attacco2(self.sprite_gabibbo)
             self.lista_potere.append(attacco)
+            self.sprite_gabibbo.imposta_animazione("attack")
+            self.sprite_gabibbo.imposta_animazione("attack")
         if key == arcade.key.M:
             self.guardGabibbo = True
 
